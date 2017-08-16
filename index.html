@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+<script src="plotly-latest.min.js"></script>
+<script type="text/javascript" src="processing.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Albedo Graphs</title>
+</head>
+
+<body>
+
+<header>
+<h2><strong>Albedo Values</strong> <em>from the last five minutes</em></h2>
+</header>
+
+<p><strong>Example of real-time streaming</strong> <em>using Plotly,
+with randomly-generated y-values</em></p>
+<div id="stream"></div>
+<script>
+
+  var layout = {
+    title: 'Albedo',
+    titlefont: {
+      family: 'Courier New, monospace',
+      size: 27,
+      color: '#7f7f7f'
+    },
+    xaxis: {
+      title: 'Time',
+      titlefont: {
+        family: 'Courier New, monospace',
+        size: 18,
+        color: '#7f7f7f'
+      }
+    },
+    yaxis: {
+      title: 'Albedo Value',
+      titlefont: {
+        family: 'Courier New, monospace',
+        size: 18,
+        color: '#7f7f7f'
+      }
+    },
+    autosize: false,
+    width: 600,
+    height: 500,
+    margin: {
+      l: 80,
+      r: 80,
+      b: 100,
+      t: 100,
+      pad: 8
+    },
+  };
+  var arrayLength = 30
+  var newArray = []
+
+  for(var i = 0; i < arrayLength; i++) {
+    var y = Math.random()
+    newArray[i] = y
+  }
+
+  Plotly.plot('stream', [{
+    y: newArray,
+    mode: 'lines',
+    line: {color: '#80CAF6'}
+  }], layout);
+
+  var cnt = 0;
+
+  var interval = setInterval(function() {
+
+    // Adding new value to Graph's data array
+    var y = Math.random()
+    newArray = newArray.concat(y)
+    // Removing oldest value from Graph's data array
+    newArray.splice(0, 1)
+
+    var data_update = {
+      y: [newArray]
+    };
+
+    Plotly.update('stream', data_update)
+
+    if(cnt === 100) clearInterval(interval);
+  }, 200);
+</script>
+<p></p>
+</body>
+
+</html>
