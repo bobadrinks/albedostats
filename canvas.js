@@ -19,16 +19,15 @@ $(document).ready(function() {
     Context.create("canvas"); 
 
     /* Healthbar */
-    var DEF_ALBEDO = 300;
-    var value = DEF_ALBEDO;
+    var BAR_WIDTH = 430;
+    var value = BAR_WIDTH;
     var albedo = 0.75;
-    var BAR_WIDTH = 300;
     var BAR_HEIGHT = 10;
     var RADIUS = 5;
     var textYPos = 20;
     var xPos = 50;
     var yPos = 60;
-    var MAX = DEF_ALBEDO;
+    var MAX = BAR_WIDTH;
     var MIN = 0;
 
     // loops
@@ -63,7 +62,7 @@ $(document).ready(function() {
       Context.context.fill();
 
       Context.context.font = "42px Courier New";
-      Context.context.fillText("Albedo " + albedo, xPos, canvas.height / 2);
+      Context.context.fillText("Global Albedo " + albedo, xPos, canvas.height / 2);
       Context.context.closePath();
     }
 
@@ -125,3 +124,4 @@ $(document).ready(function() {
     setInterval(draw, 300);
 
 });
+
