@@ -18,23 +18,20 @@ $(document).ready(function() {
     /* "canvas" string - we get Element by ID from the html file */
     Context.create("canvas"); 
 
-    /* Healthbar */
-    var DEF_ALBEDO = 300;
-    var value = DEF_ALBEDO;
     var albedo = 0.75;
-    var BAR_WIDTH = 300;
+    var BAR_WIDTH = 450;
+    var value = BAR_WIDTH;
     var BAR_HEIGHT = 10;
     var RADIUS = 5;
     var textYPos = 20;
     var xPos = 50;
     var yPos = 60;
-    var MAX = DEF_ALBEDO;
+    var MAX = BAR_WIDTH;
     var MIN = 0;
 
     // loops
     function draw() {
       drawBackground();
-      albedo = Math.round(Math.random() * 100) / 100;
       drawAlbedoGauge();
     }
 
@@ -48,6 +45,7 @@ $(document).ready(function() {
     // Function to create and draw healthbar
     function drawAlbedoGauge() {
 
+      albedo = Math.round(albedo * 100) / 100;
       /* Bar underneath is gray */
       Context.context.fillStyle = "#a0a0a0";
       roundRect(Context.context, xPos, yPos,
@@ -55,7 +53,7 @@ $(document).ready(function() {
       Context.context.fill();
       Context.context.closePath();
 
-      /* White text and health bar */
+      /* White text and bar */
       Context.context.beginPath();
       Context.context.fillStyle = "#ffffff";
       roundRect(Context.context, xPos, yPos, albedo * BAR_WIDTH, BAR_HEIGHT, RADIUS,
@@ -63,7 +61,7 @@ $(document).ready(function() {
       Context.context.fill();
 
       Context.context.font = "42px Courier New";
-      Context.context.fillText("Albedo " + albedo, xPos, canvas.height / 2);
+      Context.context.fillText("Global Albedo " + albedo, xPos, canvas.height / 2);
       Context.context.closePath();
     }
 
