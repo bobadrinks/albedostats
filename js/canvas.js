@@ -20,7 +20,6 @@ $(document).ready(function() {
 
     var albedo = 0.75;
     var BAR_WIDTH = 450;
-    var value = BAR_WIDTH;
     var BAR_HEIGHT = 10;
     var RADIUS = 5;
     var textYPos = 20;
@@ -32,6 +31,8 @@ $(document).ready(function() {
     // loops
     function draw() {
       drawBackground();
+      albedo = Math.random();
+      albedo = Math.round(albedo * 100) / 100;
       drawAlbedoGauge();
     }
 
@@ -45,7 +46,6 @@ $(document).ready(function() {
     // Function to create and draw healthbar
     function drawAlbedoGauge() {
 
-      albedo = Math.round(albedo * 100) / 100;
       /* Bar underneath is gray */
       Context.context.fillStyle = "#a0a0a0";
       roundRect(Context.context, xPos, yPos,

@@ -1,7 +1,7 @@
 // MIT License:
 //
 // Copyright (c) 2010-2013, Joe Walnes
-//               2013-2017, Drew Noakes
+//               2013-2014, Drew Noakes
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /**
  * Smoothie Charts - http://smoothiecharts.org/
  * (c) 2010-2013, Joe Walnes
- *     2013-2017, Drew Noakes
+ *     2013-2014, Drew Noakes
  *
  * v1.0: Main charting library, by Joe Walnes
  * v1.1: Auto scaling of axis, by Neil Dunn
@@ -73,8 +73,6 @@
  * v1.26: Add support for resizing on high device pixel ratio screens, by @copacetic
  * v1.27: Fix bug introduced in v1.26 for non whole number devicePixelRatio values, by @zmbush
  * v1.28: Add 'minValueScale' option, by @megawac
- *        Fix 'labelPos' for different size of 'minValueString' 'maxValueString', by @henryn
- * v1.29: Support responsive sizing, by @drewnoakes
  */
 
 ;(function(exports) {
@@ -307,8 +305,7 @@
       fontFamily: 'monospace',
       precision: 2
     },
-    horizontalLines: [],
-    responsive: false
+    horizontalLines: []
   };
 
   // Based on http://inspirit.github.com/jsfeat/js/compatibility.js
@@ -438,42 +435,27 @@
   /**
    * Make sure the canvas has the optimal resolution for the device's pixel ratio.
    */
-  SmoothieChart.prototype.resize = function () {
-    var dpr = !this.options.enableDpiScaling || !window ? window.devicePixelRatio : 1,
-        width, height;
-    if (this.options.responsive) {
-      // Newer behaviour: Use the canvas's size in the layout, and set the internal
-      // resolution according to that size and the device pixel ratio (eg: high DPI)
-      width = this.canvas.offsetWidth;
-      height = this.canvas.offsetHeight;
+  SmoothieChart.prototype.resize = function() {
+    // TODO this function doesn't handle the value of enableDpiScaling changing during execution
+    if (!this.options.enableDpiScaling || !window || window.devicePixelRatio === 1)
+      return;
 
-      if (width !== this.lastWidth) {
-        this.lastWidth = width;
-        this.canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
-      }
-      if (height !== this.lastHeight) {
-        this.lastHeight = height;
-        this.canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
-      }
-    } else if (dpr !== 1) {
-      // Older behaviour: use the canvas's inner dimensions and scale the element's size
-      // according to that size and the device pixel ratio (eg: high DPI)
-      width = parseInt(this.canvas.getAttribute('width'));
-      height = parseInt(this.canvas.getAttribute('height'));
+    var dpr = window.devicePixelRatio;
+    var width = parseInt(this.canvas.getAttribute('width'));
+    var height = parseInt(this.canvas.getAttribute('height'));
 
-      if (!this.originalWidth || (Math.floor(this.originalWidth * dpr) !== width)) {
-        this.originalWidth = width;
-        this.canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
-        this.canvas.style.width = width + 'px';
-        this.canvas.getContext('2d').scale(dpr, dpr);
-      }
+    if (!this.originalWidth || (Math.floor(this.originalWidth * dpr) !== width)) {
+      this.originalWidth = width;
+      this.canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
+      this.canvas.style.width = width + 'px';
+      this.canvas.getContext('2d').scale(dpr, dpr);
+    }
 
-      if (!this.originalHeight || (Math.floor(this.originalHeight * dpr) !== height)) {
-        this.originalHeight = height;
-        this.canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
-        this.canvas.style.height = height + 'px';
-        this.canvas.getContext('2d').scale(dpr, dpr);
-      }
+    if (!this.originalHeight || (Math.floor(this.originalHeight * dpr) !== height)) {
+      this.originalHeight = height;
+      this.canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
+      this.canvas.style.height = height + 'px';
+      this.canvas.getContext('2d').scale(dpr, dpr);
     }
   };
 
@@ -769,11 +751,10 @@
     if (!chartOptions.labels.disabled && !isNaN(this.valueRange.min) && !isNaN(this.valueRange.max)) {
       var maxValueString = chartOptions.yMaxFormatter(this.valueRange.max, chartOptions.labels.precision),
           minValueString = chartOptions.yMinFormatter(this.valueRange.min, chartOptions.labels.precision),
-          maxLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(maxValueString).width - 2,
-          minLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(minValueString).width - 2;
+          labelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(maxValueString).width - 2;
       context.fillStyle = chartOptions.labels.fillStyle;
-      context.fillText(maxValueString, maxLabelPos, chartOptions.labels.fontSize);
-      context.fillText(minValueString, minLabelPos, dimensions.height - 2);
+      context.fillText(maxValueString, labelPos, chartOptions.labels.fontSize);
+      context.fillText(minValueString, labelPos, dimensions.height - 2);
     }
 
     // Display timestamps along x-axis at the bottom of the chart.

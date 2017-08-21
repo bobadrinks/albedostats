@@ -16,21 +16,21 @@ var seriesOptions = [
 function initHost(hostId) {
 
   // Initialize an empty TimeSeries for each CPU.
-  var cpuDataSets = [new TimeSeries()];
+  var dataSet = [new TimeSeries()];
 
   var now = new Date().getTime();
   for (var t = now - 1000 * 50; t <= now; t += 1000) {
-    addRandomValueToDataSets(t, cpuDataSets);
+    addRandomValueToDataSets(t, dataSet);
   }
   // Every second, simulate a new set of readings being taken from each CPU.
   setInterval(function() {
-    addRandomValueToDataSets(new Date().getTime(), cpuDataSets);
+    addRandomValueToDataSets(new Date().getTime(), dataSet);
   }, 1000);
 
   // Build the timeline
   var timeline = new SmoothieChart({ fps: 30, millisPerPixel: 20, grid: { strokeStyle: '#555555', lineWidth: 1, millisPerLine: 1000, verticalSections: 4}});
-  for (var i = 0; i < cpuDataSets.length; i++) {
-    timeline.addTimeSeries(cpuDataSets[i], seriesOptions[i]);
+  for (var i = 0; i < dataSet.length; i++) {
+    timeline.addTimeSeries(dataSet[i], seriesOptions[i]);
   }
   timeline.streamTo(document.getElementById(hostId + 'Cpu'), 1000);
 }
