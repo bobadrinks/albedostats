@@ -26,9 +26,10 @@
       for (var i = 0; i < 50; i++) {
         readings.append(new Date(endTime - i*500), 0.75);
       }
-      var ws = new ReconnectingWebSocket('ws://jocelyn.local:8000/');
+      var ws = new ReconnectingWebSocket('ws://raspberrypi:8000/');
       ws.onopen = function() {
         document.body.style.backgroundColor = '#cfc';
+	var timeStart = new Date();
       };
       ws.onclose = function() {
         document.body.style.backgroundColor = null;
@@ -36,7 +37,7 @@
       ws.onmessage = function(event) {
         document.getElementById('text').textContent = "no";
         value = parseFloat(event.data);
-        document.getElementById('text').textContent = 'TIME ' + (new Date().getTime()) + ' ALBEDO: ' + value + '\n';
+        document.getElementById('text').textContent = 'TIME ' + (new Date()) + ' ALBEDO: ' + (Math.round(value*100) / 100) + '\n';
         readings.append(new Date().getTime(), value);
       };
       function createTimeline() {
@@ -93,7 +94,7 @@
           // loops
           function draw() {
             drawBackground();
-            albedo = value;
+            albedo = Math.round(value*100)/100;
             drawAlbedoGauge();
           }
 
