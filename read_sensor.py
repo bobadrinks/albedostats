@@ -7,7 +7,6 @@
 # import RPi.GPIO as GPIO, time, os      
 import time, os
 import datetime
-import pytz
 from sys import stdout
 import serial
 import random

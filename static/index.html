@@ -4,7 +4,7 @@
 
   <head>
     <title>Pi sensor real-time plots</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" type="text/css">
     <script type="text/javascript" src="vendor/smoothie.js"></script>
     <script type="text/javascript" src="vendor/reconnecting-websocket.min.js"></script>
     <script type="text/javascript" src="vendor/jquery.js"></script>
@@ -121,7 +121,7 @@
                 true, false);
             Context.context.fill();
 
-            Context.context.font = "42px Courier New";
+            Context.context.font = "42px Palatino";
             Context.context.fillText("Global Albedo " + albedo, xPos, canvas.height / 2);
             Context.context.closePath();
           }
