@@ -26,7 +26,7 @@
       for (var i = 0; i < 50; i++) {
         readings.append(new Date(endTime - i*500), 0.75);
       }
-      var ws = new ReconnectingWebSocket('ws://jocelyn.dynamic.ucsd.edu:8000/');
+      var ws = new ReconnectingWebSocket('ws://jocelyn.local:8000/');
       ws.onopen = function() {
         document.body.style.backgroundColor = '#cfc';
       };
@@ -35,10 +35,8 @@
       };
       ws.onmessage = function(event) {
         document.getElementById('text').textContent = "no";
-        var data = event.data.split(",");
-        var timestamp = Math.round(parseFloat(data[0])) / 100;  // expects ms
-        value = parseFloat(data[1]);
-        document.getElementById('text').textContent = 'TIME: ' + timestamp + ' ALBEDO: ' + value + '\n';
+        value = parseFloat(event.data);
+        document.getElementById('text').textContent = 'TIME ' + (new Date().getTime()) + ' ALBEDO: ' + value + '\n';
         readings.append(new Date().getTime(), value);
       };
       function createTimeline() {

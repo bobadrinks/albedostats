@@ -28,7 +28,7 @@ def readSensorValue ():
         return reading
 
     else:
-        return -1
+        return -1 
  
 def bars(x, scale=0.01):
     return "#" * int(scale * x)    
@@ -38,32 +38,32 @@ def stopAudio():
     return
 
 def playAudio(trackNumber):
-    stopAudio()
-    if (trackNumber == 1):
+    if (trackNumber == 0):
         os.system('mpg123 -q audio/windchimes.mp3 &')
-    elif (trackNumber == 2):
+    elif (trackNumber == 1):
         os.system('mpg123 -q audio/water-dripping.mp3 &')
     else:
         os.system('mpg123 -q audio/river.mp3 &')
     return
 
 def adjustAudio(reading, trackNumber):
-    if (reading > 0.65):
-        newTrackNumber = 1
+    if (reading > 0.55):
+        newTrackNumber = 0
         # cold, high albedo
-    elif ((reading <= 0.65) & (reading > 0.1)):
-        newTrackNumber = 2
+    elif ((reading <= 0.55) and (reading > 0.10)):
+        newTrackNumber = 1
         # water dripping when albedo moderate
     else:
-        newTrackNumber = 3
+        newTrackNumber = 2
         # do default for low albedo
 
     if (newTrackNumber == trackNumber):
         return trackNumber
     else:
+        stopAudio()
         playAudio(newTrackNumber)
-        time.sleep(1)
         return newTrackNumber
+    time.sleep(0.5)
    
 def to_unix_timestamp(ts):
     """
@@ -77,18 +77,26 @@ def to_unix_timestamp(ts):
 
 if __name__ == "__main__":
 
-    trackNumber = 1
+    INCREMENT = 0.05
+    trackNumber = 0
+    oldReading = 0.05
     while True:                                     
          reading = readSensorValue()
          reading = round(reading, 2)
          if (reading == -1):
-             reading = random.random()
-             reading = round(reading, 2)
+             if ((oldReading >= 1) or (oldReading <= 0)):
+                 INCREMENT = -INCREMENT
+         oldReading += INCREMENT
+         reading = oldReading
+         reading = round(reading, 2)
+           
+# reading = random.random()
+#             reading = round(reading, 2)
          n = datetime.datetime.now()
          timestamp = to_unix_timestamp(n)
-         print("{},{}".format(timestamp, reading))
+         print(reading)
          # Flush the output to stdout after every reading to make sure 
          # output isn't buffered
          time.sleep(0.5)
          stdout.flush()
-#         trackNumber = adjustAudio(reading, trackNumber)
+         trackNumber = adjustAudio(reading, trackNumber)
