@@ -2,9 +2,43 @@
 import serial, threading, sys
 from sys import stdout
 from time import sleep
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+from tornado.options import define, options, parse_command_line
+
+define("port", default=8000, help="run on the given port", type=int)
+
+# Store clients in dictionary
+clients = dict()
+
 xbee=serial.Serial(port='/dev/ttyUSB0',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
 PACKET_START = '<'
 PACKET_END = '>'
+logFile = open("log.txt", "w", 0)
+
+class IndexHandler(tornado.web.RequestHandler):
+  @tornado.web.asynchronous
+  def get(self):
+    # self.write("This is your response")
+    self.render("index.html")
+    self.finish()
+
+# See https://media.readthedocs.org/pdf/tornado/latest/tornado.pdf
+# for tornado websocket documentation
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
+  def open(self):
+    self.id = self.get_argument("Id")
+    self.stream.set_nodelay(True)
+    clients[self.id] = {"id": self.id, "object": self}
+
+  def on_message(self, message):
+    self.write_message("You said: " + message)
+
+  def on_close(self):
+    if self.id in clients:
+      del clients[self.id]
+    print("Websocket closed")
 
 class serialThread(threading.Thread):
   def __init__(self):
@@ -60,11 +94,29 @@ try:
   while (True):
     if (xBeeThread.packetAccepted):
       #Print values to stdout, write to file
-      print(float(xBeeThread.acceptedValue) / 100)
+      value = float(xBeeThread.acceptedValue) / 100
+      # Write the value to file
+      logFile.write(str(value) + "\n")
+      # write_message(value, False)
       xBeeThread.packetAccepted = False
       xBeeThread.RX = True
-      stdout.flush()
+#      stdout.flush()
+    else:
+      #print(0)
+      logFile.write(str(0) + "\n")
+      logFile.flush()
+      sleep(0.1)
 except:
   xBeeThread.stop()
+  logFile.close()
   sleep(0.5)
   sys.exit()
+
+app = tornado.web.Application([
+  (r'/', IndexHandler),
+  (r'/', WebSocketHandler),
+])
+if __name__ == '__main__':
+  parse_command_line()
+  app.listen(options.port)
+  tornado.ioloop.IOLoop.instance().start()
