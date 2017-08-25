@@ -28,8 +28,8 @@
       }
       var ws = new ReconnectingWebSocket('ws://localhost:8000/');
       ws.onopen = function() {
+        ws.send("Hello, world");
         document.body.style.backgroundColor = '#cfc';
-	var timeStart = new Date();
       };
       ws.onclose = function() {
         document.body.style.backgroundColor = null;
@@ -37,10 +37,18 @@
       ws.onmessage = function(event) {
         document.getElementById('text').textContent = "no";
         value = parseFloat(event.data);
-        document.getElementById('text').textContent = 'TIME ' + (new Date()) + ' ALBEDO: ' + (Math.round(value*100) / 100) + '\n';
+        // On the canvas, update the TIME: __ ALBEDO: __ label with the albedo
+        // value, rounded to 2 decimal places
+        document.getElementById('text').textContent = 'TIME ' + (new Date()) 
+          + ' ALBEDO: ' + (Math.round(value*100) / 100) + '\n';
         readings.append(new Date().getTime(), value);
       };
+      /*
+       * Create the actual chart and handle updating it;
+       * This uses the smoothie-js library from Joe Walnes
+       */
       function createTimeline() {
+        // Initialize the chart with some default settings
         var chart = new SmoothieChart({
           fps: 30, millisPerPixel: 20, 
           grid: { 
@@ -50,14 +58,18 @@
           minValue:0.0,
           maxValue:1.0
         });
+        // This is where the chart gets data
+        // We'll "update" the chart by appending data to this TimeSeries
         chart.addTimeSeries(readings, { 
             strokeStyle: 'rgba(0, 255, 0, 0.6)',
             fillStyle: 'rgba(0, 0, 255, 0.2)',
             lineWidth: 3 });
+        // This chart streams to the canvas "chart" declared in HTML code
         chart.streamTo(document.getElementById("chart"), 1000);
       }
     </script>
     <br>
+    <!--This canvas creates and updates the gauge/bar displaying global albedo-->
     <canvas id="canvas" width="650" height="100" style="border: 4px solid gray;
       width: 650px; height: 100px; background-color: #ff8100"></canvas>
     <script type="text/javascript">
