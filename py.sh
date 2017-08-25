@@ -1,1 +1,1 @@
-nice -20 python read_sensor.py > log.txt &
+nice -20 python xbee_serial.py > log.txt &
