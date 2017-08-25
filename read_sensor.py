@@ -90,10 +90,6 @@ if __name__ == "__main__":
          reading += 0.15 * math.cos(count*6)
          reading += 0.01 * numpy.random.randn()
 
-# reading = random.random()
-#             reading = round(reading, 2)
-         n = datetime.datetime.now()
-         timestamp = to_unix_timestamp(n)
          print(reading)
          # Flush the output to stdout after every reading to make sure 
          # output isn't buffered
