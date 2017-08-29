@@ -21,6 +21,7 @@ import random
 ser = False
  
 DEBUG = 1
+logFile = open("log.txt", "w")
  
 def readSensorValue ():
     # Read from Serial, and use strip() to remove \r\n, then convert to float
@@ -90,9 +91,11 @@ if __name__ == "__main__":
          reading += 0.15 * math.cos(count*6)
          reading += 0.01 * numpy.random.randn()
 
-         print(reading)
+         logFile.write(str(reading) + "\n")
+         logFile.flush()
+#         print(reading)
          # Flush the output to stdout after every reading to make sure 
          # output isn't buffered
          time.sleep(0.30)
-         stdout.flush()
+#         stdout.flush()
          trackNumber = adjustAudio(reading, trackNumber)
