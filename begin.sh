@@ -1,2 +1,2 @@
 #!/bin/bash
-chromium-browser http://localhost:8000/ &
+chromium-browser http://raspberrypi:8000/ &

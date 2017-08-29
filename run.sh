@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ~/albedostats
-sudo ./py.sh
+#cd ~/albedostats
+sudo ./py.sh &
 ./begin.sh
 ./serve.sh
