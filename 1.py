@@ -1,13 +1,11 @@
 #!/usr/bin/env python
+
 import serial, threading, sys
 from sys import stdout
 from time import sleep
-
 xbee=serial.Serial(port='/dev/ttyUSB0',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
 PACKET_START = '<'
 PACKET_END = '>'
-logFile = open('log.txt', 'w')
-
 
 class serialThread(threading.Thread):
   def __init__(self):
@@ -37,11 +35,10 @@ class serialThread(threading.Thread):
           if (rxStarted):
             if (newChar != PACKET_END):
               self.rxBuffer += newChar
+              rxStarted = False
               if (len(self.rxBuffer) >= self.BUFFER_SIZE):
-                rxStarted = False
                 self.rxBuffer = ""
               else:
-                rxStarted = False
                 self.NEW_PACKET = True
       elif (newChar == PACKET_START):
         rxStarted = True
@@ -60,19 +57,16 @@ xBeeThread.daemon = True
 xBeeThread.RX = True
 xBeeThread.start()
 try:
-  while (True):
-    if (xBeeThread.packetAccepted):
-      #Print values to stdout, write to file
-      print(float(xBeeThread.albedoValue) / 100)
-      #logFile.write(str(float(xBeeThread.albedoValue) / 100) + "\n")
-      # Write the value to file
-      #logFile.write(str(value) + "\n")
-      # write_message(value, False)
+  while True:
+    if xBeeThread.packetAccepted:
+      # write vals to file
+      #logFile.write(str(float(xBeeThread.albedoValue) / 100) + "\n");
+      print(float(xBeeThread.albedoValue)/100)
       xBeeThread.packetAccepted = False
       xBeeThread.RX = True
-      sleep(0.5)
       #logFile.flush()
-#      stdout.flush()
+      stdout.flush()
+
 except:
   xBeeThread.stop()
   logFile.close()
