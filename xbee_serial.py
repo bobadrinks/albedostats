@@ -3,78 +3,41 @@ import serial, threading, sys
 from sys import stdout
 from time import sleep
 
+# Declare XBee
 xbee=serial.Serial(port='/dev/ttyUSB0',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
+# Characters that start and end the packet of data
 PACKET_START = '<'
 PACKET_END = '>'
-logFile = open('log.txt', 'w')
+# Store albedo value in this variable
+albedoValue = 0
 
+# Parse data from the XBee by reading in a loop
+while True:
+  # Read the next line sent by the XBee, in a loop
+  newLine = xbee.readline()
 
-class serialThread(threading.Thread):
-  def __init__(self):
-    threading.Thread.__init__(self)
-    self.PACKET_SIZE = 15
-    self.NUM_TXs = 5
-    self.BUFFER_SIZE = (self.PACKET_SIZE * self.NUM_TXs)
-    self.NEW_PACKET = False
-    self.rxBuffer = ""
-    self.RX = True
-    self.RUN_THREAD = True
-    self.packetAccepted = False
-    self.albedoValue = 0
+  # Make sure that the line that was read isn't empty, and then
+  # check if the first char is a '<' start char and the char that ended the last
+  # packet was a '>' end char
+  if (newLine != '' and newLine[0] == PACKET_START and newLine[-2] == PACKET_END):
+    # Now parse the actual packet
+    newLine = newLine.strip(PACKET_START);
+    newLine = newLine.strip(PACKET_END);
 
-  def stop(self):
-    self.RUN_THREAD = False
-
-  def run(self):
-    # Parse the data
-    while (self.RUN_THREAD):
-      if (self.RX == True):
-        rxStarted = False
-
-        while (self.NEW_PACKET == False and self.RUN_THREAD):
-          newChar = xbee.read()
-          sleep(0.01)
-          if (rxStarted):
-            if (newChar != PACKET_END):
-              self.rxBuffer += newChar
-              if (len(self.rxBuffer) >= self.BUFFER_SIZE):
-                rxStarted = False
-                self.rxBuffer = ""
-              else:
-                rxStarted = False
-                self.NEW_PACKET = True
-      elif (newChar == PACKET_START):
-        rxStarted = True
-
-    values = self.rxBuffer.split('|')
+    # Populate the values list with the transmitted numbers
+    values = newLine.split('|')
     if len(values) >= 2:
+      # Make sure that the two numbers are the same; if they're not, something
+      # went wrong and this data packet is corrupted/invalid
       if (values[0] == values[1]):
-        self.albedoValue = int(values[0])
-        self.RX = False
-        self.packetAccepted = True
-    self.NEW_PACKET = False
-    self.rxBuffer = ""
 
-xBeeThread = serialThread()
-xBeeThread.daemon = True
-xBeeThread.RX = True
-xBeeThread.start()
-try:
-  while (True):
-    if (xBeeThread.packetAccepted):
-      #Print values to stdout, write to file
-      print(float(xBeeThread.albedoValue) / 100)
-      #logFile.write(str(float(xBeeThread.albedoValue) / 100) + "\n")
-      # Write the value to file
-      #logFile.write(str(value) + "\n")
-      # write_message(value, False)
-      xBeeThread.packetAccepted = False
-      xBeeThread.RX = True
-      sleep(0.5)
-      #logFile.flush()
-#      stdout.flush()
-except:
-  xBeeThread.stop()
-  logFile.close()
-  sleep(0.5)
-  sys.exit()
+        # No errors detected while parsing; this albedo value is accepted
+        albedoValue = int(values[0])
+
+        # Print values to stdout, write to file (script will read from log file
+        # and update webpage
+        print(float(albedoValue) / 100)
+        stdout.flush()
+
+sleep(0.5)
+sys.exit()
